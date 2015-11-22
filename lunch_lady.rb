@@ -32,7 +32,6 @@ def error_message(menu)
   order(this_order, this_menu)
 end
 
-# refactor this into multiple methods
 def order(input_order, input_menu)
   this_menu = input_menu
   this_order = input_order
