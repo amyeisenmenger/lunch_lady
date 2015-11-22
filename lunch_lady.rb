@@ -7,76 +7,123 @@
 # ­ user can choose as many "add­on" items as they want before getting total
 # ­ user can clear their choices and start over
 # ­ user has a wallet total they start with and their choices cannot exceed what they can pay for
+require 'pry'
 
-@menu = {main_dishes: {'1'=> {name:'Spaghetti', price: 7.00},
-                       '2'=> {name:'Beef Burgundy', price: 14.00},
-                       '3'=> {name: 'Chicken Noodle Soup', price: 4.50},
-                       '4'=> {name: "Chef's Salad", price: 6.75} 
+@menu = {main_dishes: {'1'=> {name:'Spaghetti', price: '7'},
+                       '2'=> {name:'Beef Burgundy', price: '14.00'},
+                       '3'=> {name: 'Chicken Noodle Soup', price: '4.50'},
+                       '4'=> {name: "Chef's Salad", price: '6.75'} 
                        }, 
-       side_dishes: {'1'=> {name: 'Garden Salad', price: 4.00}, 
-                     '2'=> {name: 'Sourdough Bread Slice', price: 2.00}, 
-                     '3'=> {name: 'Roasted Potatoes', price: 3.00}, 
-                     '4'=> {name: 'Green Beans', price: 3.50} }
+       side_dishes: {'1'=> {name: 'Garden Salad', price: '4.00'}, 
+                     '2'=> {name: 'Sourdough Bread Slice', price: '2.00'}, 
+                     '3'=> {name: 'Roasted Potatoes', price: '3.00'}, 
+                     '4'=> {name: 'Green Beans', price: '3.50'} }
       }
 
-@order = {}
+@final_order = {}
+@number = 0
+@sum = 0
 
-def main_dish
+def error_message(menu)
+  this_menu = menu
+  puts 'We do not have that dish today.'
+  puts 'Please choose another:'
+  this_order = gets.strip
+  order(this_order, this_menu)
+end
+
+# refactor this into multiple methods
+def order(input_order, input_menu)
+  this_menu = input_menu
+  this_order = input_order
+  case this_order
+  when '1', '2', '3', '4'
+    @sum += @menu[this_menu][this_order][:price].to_f
+    if @sum > @money
+      puts 'It seems that you do not have enough money to order that dish.'
+      @sum -= @menu[this_menu][this_order][:price].to_f
+    else
+      @number +=1
+      @final_order[@number] = @menu[this_menu][this_order]
+      puts 'Adding that to your order.'
+    end
+  else
+    puts error_message(this_menu)
+  end
+end
+
+def main_dish_order
+  this_menu = :main_dishes
   puts "Today's Main Dishes:"
   @menu[:main_dishes].each { |num, value| puts "#{num}: #{value[:name]} $#{value[:price]}"}
   puts "What would you like for your main dish"
-  main_order = gets.strip
-  case main_order
-  when '1', '2', '3', '4'
-    @order[:main_order] = @menu[:main_dishes][main_order]
-  # when 'Spaghetti', 'Beef Burgundy', 'Chicken Noodle Soup', "Chef's Salad"
-  #   @order[:main_order] = 
+  this_order = gets.strip
+  order(this_order, this_menu)
+end
+
+def side_orders
+  answer = ''
+  this_menu = :side_dishes
+  while answer != 'no'
+    puts "Today's Side Dishes:"
+    @menu[:side_dishes].each { |num, value| puts "#{num}: #{value[:name]} $#{value[:price]}"}
+    puts "What would you like for your next dish?"
+    this_order = gets.strip
+    order(this_order, this_menu)
+    puts "Order another side? yes/no"
+    answer = gets.strip.downcase
+    puts `clear`
+  end
+end
+
+def clear_order
+  puts 'Is this correct?'
+  @answer = gets.strip.downcase
+  case @answer
+  when 'no'
+    puts 'Clear order and start over?'
+    @clear = gets.strip.downcase
+    case 
+      @clear
+    when 'yes'
+      @final_order = {}
+      @number = 0
+      @sum = 0
+    else
+      puts 'Please pay your bill total'
+    end
   else
-    puts 'We do not have that dish today.'
+    puts 'Please pay your bill total'
   end
 end
 
 
-def side_dish_1
-  puts "Today's Side Dishes:"
-  @menu[:side_dishes].each { |num, value| puts "#{num}: #{value[:name]} $#{value[:price]}"}
-  puts "What would you like for your 1st side dish?"
-  side_order_1 = gets.strip
-  case side_order_1
-  when '1', '2', '3', '4'
-    @order[:side_order_1] = @menu[:side_dishes][side_order_1]
-  # when 'Spaghetti', 'Beef Burgundy', 'Chicken Noodle Soup', "Chef's Salad"
-  #   @order[:main_order] = 
-  else
-    puts 'We do not have that dish today.'
+def wallet_maximum
+  puts 'You cannot order more than you can pay for.'
+  puts 'Please enter how much money you have in your wallet in $ amounts:'
+  @money = gets.to_i
+  puts "You're wallet contains $#{@money}."
+end
+
+
+def lunch_lady
+  puts 'Welcome to Lunch Lady.'
+  @clear = ''
+  @answer = ''
+  wallet_maximum
+  while @clear != 'no' && @answer != 'yes'
+    main_dish_order
+    side_orders
+    puts "Your current order includes:"
+    (1..@final_order.length).each { |num| puts @final_order[num][:name]}
+    clear_order
   end
+  puts "Which comes to: $#{@sum}"
 end
 
-def side_dish_2
-  puts "What would you like for your 2nd side dish?"
-  side_order_2 = gets.strip
-  case side_order_2
-  when '1', '2', '3', '4'
-    @order[:side_order_2] = @menu[:side_dishes][side_order_2]
-  # when 'Spaghetti', 'Beef Burgundy', 'Chicken Noodle Soup', "Chef's Salad"
-  #   @order[:main_order] = 
-  else
-    puts 'We do not have that dish today.'
-  end
-end
 
-def order
-  main_dish
-  side_dish_1
-  side_dish_2
-  puts "One #{@order[:main_order[:name]]} 
-  with a side of #{@order[:side_order_1][:name]} and #{@order[:side_order_2][:name]}"
-  puts "Which comes to:" 
-  puts @order[:main_order][:price] + @order[:side_order_1][:price] + @order[:side_order_2][:price]
-end
-
-order
+lunch_lady
 
 
-
+### @main_dish.key(value) pulls out the key associated with that value
 
