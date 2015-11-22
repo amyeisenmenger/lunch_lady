@@ -38,17 +38,23 @@ def order(input_order, input_menu)
   this_order = input_order
   case this_order
   when '1', '2', '3', '4'
-    @sum += @menu[this_menu][this_order][:price].to_f
-    if @sum > @money
-      puts 'It seems that you do not have enough money to order that dish.'
-      @sum -= @menu[this_menu][this_order][:price].to_f
-    else
-      @number +=1
-      @final_order[@number] = @menu[this_menu][this_order]
-      puts 'Adding that to your order.'
-    end
+    check_wallet(this_menu, this_order)
   else
     puts error_message(this_menu)
+  end
+end
+
+def check_wallet(input_menu, input_order)
+  this_menu = input_menu
+  this_order = input_order
+  @sum += @menu[this_menu][this_order][:price].to_f
+  if @sum > @money
+    puts 'It seems that you do not have enough money to order that dish.'
+    @sum -= @menu[this_menu][this_order][:price].to_f
+  else
+    @number +=1
+    @final_order[@number] = @menu[this_menu][this_order]
+    puts 'Adding that to your order.'
   end
 end
 
